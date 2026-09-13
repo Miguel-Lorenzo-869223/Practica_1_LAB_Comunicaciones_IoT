@@ -1,3 +1,11 @@
+// ------------------------------------------------------------
+//  Author: Miguel A.Lorenzo
+//  Date: 13/09/2026
+//  Subject: IoT Communications Laboratory 
+//  Master: MSc in Electronic Engineering
+//  University: University of Zaragoza EINA/UNIZAR
+// ------------------------------------------------------------
+
 /* ============================================================
    ADC Read Example – Arduino Nano 33 BLE Sense Lite
 
@@ -9,7 +17,8 @@
 
    Ensure the potentiometer output does not exceed 3.3V.
    ============================================================ */
-
+   
+#include <Arduino.h>
 #define ADC_0 A0
 #define SAMPLE_FREC 1 // Acquisition frequency in Hz
 

@@ -1,3 +1,11 @@
+// ------------------------------------------------------------
+//  Author: Miguel A.Lorenzo
+//  Date: 13/09/2026
+//  Subject: IoT Communications Laboratory 
+//  Master: MSc in Electronic Engineering
+//  University: University of Zaragoza EINA/UNIZAR
+// ------------------------------------------------------------
+
 /*
   The Arduino Nano 33 BLE Sense Lite is based on the nRF52840 MCU, which does
   not provide the classic Arduino timers (Timer1, Timer2, etc.). Instead, it
@@ -20,6 +28,7 @@
   sampling. 
   https://forum.arduino.cc/t/five-hardware-timers-example/905798
 */
+
 #include <Arduino.h>
 #include "BBTimer.hpp"
 
