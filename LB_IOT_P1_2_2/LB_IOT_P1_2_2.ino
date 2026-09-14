@@ -32,84 +32,66 @@
 #include <Arduino.h>
 #include "BBTimer.hpp"
 
-// Example using BBTimer class to run five hardware timers on Nano33BLE.  
-// See BBTimer.hpp for usage details. 
-// Include BBTimer.hpp header within project folder. 
+// Usamos BB_TIMER3 para evitar conflictos con Mbed OS
+BBTimer temporizador10s(BB_TIMER3);
 
-// Construct five timers.  Can construct a global scope, or within setup(), or static in loop().
-BBTimer my_t0(BB_TIMER0);
-BBTimer my_t1(BB_TIMER1);
-BBTimer my_t2(BB_TIMER2);
-BBTimer my_t3(BB_TIMER3);
-BBTimer my_t4(BB_TIMER4);
+// Bandera 'volatile' para sincronizar la ISR con el loop principal
+volatile bool ejecutarLectura = false;
 
-// global logicals for example synchronization between timer callback functions and loop().
-bool red_on = false;
-bool green_on = false;
-bool blue_on = false;
+// Variables para el parpadeo no bloqueante de los LEDs
+unsigned long tiempoPrevioLEDs = 0;
+const long intervaloLEDs = 200; // Parpadeo cada 200 ms (rápido)
+bool estadoLEDs = false;
 
-// One callback for each timer.  
-void t0Callback()
-{
-	static bool toggle = true;
-	digitalWrite(LED_BUILTIN, toggle ? HIGH : LOW);
-	toggle = !toggle;
-
-	// example changing period from within callback
-	static uint32_t period = 10000;
-	period += 10000;
-	if (period > 5e5) period = 10000;
-	my_t0.updatePeriod(period);
+// Callback del Timer (ISR): Se ejecuta cada 10 segundos
+void timerCallback() {
+    ejecutarLectura = true;
 }
-
-void t1Callback()
-{
-	static bool toggle = true;
-
-	digitalWrite(LED_POWER, toggle ? HIGH : LOW);
-	toggle = !toggle;
-}
-
-void t2Callback()
-{
-	red_on = !red_on;
-}
-
-void t3Callback()
-{
-	green_on = !green_on;
-}
-
-void t4Callback()
-{
-	blue_on = !blue_on;
-}
-
 
 void setup() {
+    Serial.begin(115200);
 
-	pinMode(LED_BUILTIN, OUTPUT);
+    // Configurar los pines de los LEDs integrados como salidas
+    pinMode(LED_BUILTIN, OUTPUT);
+    #ifdef LED_POWER
+    pinMode(LED_POWER, OUTPUT);
+    #endif
 
-	my_t0.setupTimer(500000, t0Callback);
-	my_t0.timerStart();
+    // Espera máxima de 4 segundos a la conexión del puerto serie
+    uint32_t tInicio = millis();
+    while (!Serial && (millis() - tInicio < 4000));
 
-	my_t1.setupTimer(450000, t1Callback);
-	my_t1.timerStart();
+    Serial.println("Iniciando temporizador a 10s...");
 
-	my_t2.setupTimer(420000, t2Callback);
-	my_t2.timerStart();
-
-	my_t3.setupTimer(390000, t3Callback);
-	my_t3.timerStart();
-
-	my_t4.setupTimer(340000, t4Callback);
-	my_t4.timerStart();
+    // Configurar e iniciar temporizador (10 segundos = 10.000.000 microsegundos)
+    temporizador10s.setupTimer(10000000, timerCallback);
+    temporizador10s.timerStart();
 }
 
 void loop() {
+    // ------------------------------------------------------------------
+    // 1. Tarea Continua: Parpadeo de LEDs (Indica que el loop está vivo)
+    // ------------------------------------------------------------------
+    unsigned long tiempoActual = millis();
+    if (tiempoActual - tiempoPrevioLEDs >= intervaloLEDs) {
+        tiempoPrevioLEDs = tiempoActual;
+        estadoLEDs = !estadoLEDs;
 
-	// these don't like to be set from inside a callback.
-	digitalWrite(LED_RED, red_on ? LOW : HIGH);
-	digitalWrite(LED_GREEN, green_on ? LOW : HIGH);
-	digitalWrite(LED_BLUE, blue_on ? LOW : HIGH);
+        digitalWrite(LED_BUILTIN, estadoLEDs ? HIGH : LOW);
+        #ifdef LED_POWER
+        digitalWrite(LED_POWER, estadoLEDs ? HIGH : LOW);
+        #endif
+    }
+
+    // ------------------------------------------------------------------
+    // 2. Tarea Periódica: Atendida al activarse la bandera de la ISR (10s)
+    // ------------------------------------------------------------------
+    if (ejecutarLectura) {
+        ejecutarLectura = false; // Restablecer la bandera
+
+        int valorADC = analogRead(A0);
+
+        Serial.print("[10s Timer] Lectura del ADC (A0): ");
+        Serial.println(valorADC);
+    }
 }
