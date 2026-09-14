@@ -36,16 +36,16 @@
 BBTimer temporizador10s(BB_TIMER3);
 
 // Bandera 'volatile' para sincronizar la ISR con el loop principal
-volatile bool ejecutarLectura = false;
+volatile bool sample = false;
 
 // Variables para el parpadeo no bloqueante de los LEDs
-unsigned long tiempoPrevioLEDs = 0;
-const long intervaloLEDs = 200; // Parpadeo cada 200 ms (rápido)
-bool estadoLEDs = false;
+unsigned long leds_prev_time = 0;
+const long blink_led_time = 200; // Parpadeo cada 200 ms (rápido)
+bool blink_state = false;
 
 // Callback del Timer (ISR): Se ejecuta cada 10 segundos
 void timerCallback() {
-    ejecutarLectura = true;
+    sample = true;
 }
 
 void setup() {
@@ -58,10 +58,10 @@ void setup() {
     #endif
 
     // Espera máxima de 4 segundos a la conexión del puerto serie
-    uint32_t tInicio = millis();
-    while (!Serial && (millis() - tInicio < 4000));
+    uint32_t ticks = millis();
+    while (!Serial && (millis() - ticks < 4000));
 
-    Serial.println("Iniciando temporizador a 10s...");
+    Serial.println("OK... RUNNING");
 
     // Configurar e iniciar temporizador (10 segundos = 10.000.000 microsegundos)
     temporizador10s.setupTimer(10000000, timerCallback);
@@ -69,25 +69,20 @@ void setup() {
 }
 
 void loop() {
-    // ------------------------------------------------------------------
-    // 1. Tarea Continua: Parpadeo de LEDs (Indica que el loop está vivo)
-    // ------------------------------------------------------------------
-    unsigned long tiempoActual = millis();
-    if (tiempoActual - tiempoPrevioLEDs >= intervaloLEDs) {
-        tiempoPrevioLEDs = tiempoActual;
-        estadoLEDs = !estadoLEDs;
 
-        digitalWrite(LED_BUILTIN, estadoLEDs ? HIGH : LOW);
+    unsigned long curr_time = millis();
+    if (curr_time - leds_prev_time >= blink_led_time) {
+        leds_prev_time = curr_time;
+        blink_state = !blink_state;
+
+        digitalWrite(LED_BUILTIN, blink_state ? HIGH : LOW);
         #ifdef LED_POWER
         digitalWrite(LED_POWER, estadoLEDs ? HIGH : LOW);
         #endif
     }
 
-    // ------------------------------------------------------------------
-    // 2. Tarea Periódica: Atendida al activarse la bandera de la ISR (10s)
-    // ------------------------------------------------------------------
-    if (ejecutarLectura) {
-        ejecutarLectura = false; // Restablecer la bandera
+    if (sample) {
+        sample = false;
 
         int valorADC = analogRead(A0);
 
