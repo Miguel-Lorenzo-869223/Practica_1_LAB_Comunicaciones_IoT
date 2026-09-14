@@ -31,6 +31,8 @@
 
 #include <Arduino.h>
 #include "BBTimer.hpp"
+#define ADC_0 A0
+#define SAMPLE_FREC 10 // Acquisition frequency in Hz
 
 // Usamos BB_TIMER3 para evitar conflictos con Mbed OS
 BBTimer temporizador10s(BB_TIMER3);
@@ -43,6 +45,9 @@ unsigned long leds_prev_time = 0;
 const long blink_led_time = 200; // Parpadeo cada 200 ms (rápido)
 bool blink_state = false;
 
+//FUNCTIONS DECLARATION
+void printer(int adc_level, char* volt_str);
+
 // Callback del Timer (ISR): Se ejecuta cada 10 segundos
 void timerCallback() {
     sample = true;
@@ -53,6 +58,7 @@ void setup() {
 
     // Configurar los pines de los LEDs integrados como salidas
     pinMode(LED_BUILTIN, OUTPUT);
+
     #ifdef LED_POWER
     pinMode(LED_POWER, OUTPUT);
     #endif
@@ -64,7 +70,7 @@ void setup() {
     Serial.println("OK... RUNNING");
 
     // Configurar e iniciar temporizador (10 segundos = 10.000.000 microsegundos)
-    temporizador10s.setupTimer(10000000, timerCallback);
+    temporizador10s.setupTimer(SAMPLE_FREC*1000000, timerCallback);
     temporizador10s.timerStart();
 }
 
@@ -84,9 +90,20 @@ void loop() {
     if (sample) {
         sample = false;
 
-        int valorADC = analogRead(A0);
+        //int valorADC = analogRead(A0);
 
-        Serial.print("[10s Timer] Lectura del ADC (A0): ");
-        Serial.println(valorADC);
+        //Serial.print("[10s Timer] Lectura del ADC (A0): ");
+        //Serial.println(valorADC);
+
+        int adc_level = analogRead(ADC_0);
+        float voltage = (adc_level/1024.0)*3.3;
+        String volt_str = String(voltage, 3);
+        printer(adc_level, volt_str);
     }
+}
+
+void printer(int adc_level, String volt_str){
+    char buffer[60];
+    sprintf(buffer, "ADC=%d  Voltage=%s V", adc_level, volt_str.c_str());
+    Serial.println(buffer);
 }
