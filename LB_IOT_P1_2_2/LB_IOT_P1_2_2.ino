@@ -34,13 +34,13 @@
 #define ADC_0 A0
 #define SAMPLE_FREC 10 // Acquisition frequency in Hz
 
-// Usamos BB_TIMER3 para evitar conflictos con Mbed OS
-BBTimer temporizador10s(BB_TIMER3);
+// Use BB_TIMER3 to avoid conflicts with Mbed OS
+BBTimer timer_3_adc(BB_TIMER3);
 
-// Bandera 'volatile' para sincronizar la ISR con el loop principal
+// Use BB_TIMER3 to avoid conflicts with Mbed OS
 volatile bool sample = false;
 
-// Variables para el parpadeo no bloqueante de los LEDs
+// LED blink variables
 unsigned long leds_prev_time = 0;
 const long blink_led_time = 200; // Parpadeo cada 200 ms (rápido)
 bool blink_state = false;
@@ -48,7 +48,7 @@ bool blink_state = false;
 //FUNCTIONS DECLARATION
 void printer(int adc_level, char* volt_str);
 
-// Callback del Timer (ISR): Se ejecuta cada 10 segundos
+//Timer ISR: runs every 10 secondss
 void timerCallback() {
     sample = true;
 }
@@ -56,22 +56,21 @@ void timerCallback() {
 void setup() {
     Serial.begin(115200);
 
-    // Configurar los pines de los LEDs integrados como salidas
+    // Configure onboard LEDs
     pinMode(LED_BUILTIN, OUTPUT);
 
     #ifdef LED_POWER
     pinMode(LED_POWER, OUTPUT);
     #endif
 
-    // Espera máxima de 4 segundos a la conexión del puerto serie
+    // Wait up to 4 seconds for Serial
     uint32_t ticks = millis();
     while (!Serial && (millis() - ticks < 4000));
-
     Serial.println("OK... RUNNING");
 
-    // Configurar e iniciar temporizador (10 segundos = 10.000.000 microsegundos)
-    temporizador10s.setupTimer(SAMPLE_FREC*1000000, timerCallback);
-    temporizador10s.timerStart();
+    // Start 10‑second timer (10,000,000 µs)
+    timer_3_adc.setupTimer(SAMPLE_FREC*1000000, timerCallback);
+    timer_3_adc.timerStart();
 }
 
 void loop() {
@@ -89,12 +88,6 @@ void loop() {
 
     if (sample) {
         sample = false;
-
-        //int valorADC = analogRead(A0);
-
-        //Serial.print("[10s Timer] Lectura del ADC (A0): ");
-        //Serial.println(valorADC);
-
         int adc_level = analogRead(ADC_0);
         float voltage = (adc_level/1024.0)*3.3;
         String volt_str = String(voltage, 3);
