@@ -37,6 +37,7 @@ void setup() {
 
 void loop() {
   curr_time = millis(); //update time
+  
   if (millis() - ticks >= (1000 / SAMPLE_FREC)) {
       ticks = millis();
 
