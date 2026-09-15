@@ -6,7 +6,6 @@
 //  University: University of Zaragoza EINA/UNIZAR
 // ------------------------------------------------------------
 
-
 #include <Arduino.h>
 #include "mbed.h"
 
