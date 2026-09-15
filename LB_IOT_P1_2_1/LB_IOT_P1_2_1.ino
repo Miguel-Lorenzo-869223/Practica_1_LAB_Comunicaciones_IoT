@@ -16,7 +16,8 @@
    Arduino platforms have limited float support in sprintf().
 
    Ensure the potentiometer output does not exceed 3.3V.
-   ============================================================ */
+   ============================================================ 
+*/
    
 #include <Arduino.h>
 #define ADC_0 A0
