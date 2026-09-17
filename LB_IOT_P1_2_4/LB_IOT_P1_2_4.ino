@@ -82,12 +82,14 @@ void read_serial(){
 void parse_command(char* buffer) {
   // Case 1: "ADC" -> Single reading
   if (strcmp(buffer, "ADC") == 0) {
+    pwmPin.write(0/9.0f);
     timer_3_adc.timerStop();
     Serial.println(analogRead(ADC_0));
   } 
   
   // Case 2: "ADC(x)" -> Periodic reading or Stop (x=0)
   else if (sscanf(buffer, "ADC(%d)", &x) == 1) {
+    pwmPin.write(0/9.0f);
     if (x > 0) {
       period_seconds = x;
       timer_3_adc.timerStop();
