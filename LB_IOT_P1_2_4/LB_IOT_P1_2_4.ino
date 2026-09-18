@@ -103,7 +103,7 @@ void parse_command(char* buffer) {
   // Case 3: "PWM(x)" -> Output duty cycle adjustment (0 to 9)
   else if (sscanf(buffer, "PWM(%d)", &x) == 1) {
     timer_3_adc.timerStop();
-    if (x >= 0 && x <= 9) {
+    if ((x >= 0) && (x <= 9)) {
       pwmLevel = x;
       pwmPin.write(pwmLevel / 9.0f);
     } else {
