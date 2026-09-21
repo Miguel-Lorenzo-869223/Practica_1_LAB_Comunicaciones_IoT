@@ -6,14 +6,6 @@
 //  University: University of Zaragoza EINA/UNIZAR
 // ------------------------------------------------------------
 
-// ------------------------------------------------------------
-//  Author: Miguel A.Lorenzo
-//  Date: 17/09/2026
-//  Subject: IoT Communications Laboratory 
-//  Master: MSc in Electronic Engineering
-//  University: University of Zaragoza EINA/UNIZAR
-// ------------------------------------------------------------
-
 #include <Arduino.h>
 #include <Wire.h>
 
