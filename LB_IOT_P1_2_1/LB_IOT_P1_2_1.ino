@@ -34,7 +34,7 @@ void setup() {
   pinMode(ADC_0, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
-  curr_time = millis(); //start reference
+  curr_time = millis(); //Start reference
 }
 
 void loop() {
