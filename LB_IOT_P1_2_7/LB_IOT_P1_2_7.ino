@@ -1,6 +1,6 @@
 // ------------------------------------------------------------
 //  Author: Miguel A.Lorenzo
-//  Date: 18/09/2026
+//  Date: 17/09/2026
 //  Subject: IoT Communications Laboratory 
 //  Master: MSc in Electronic Engineering
 //  University: University of Zaragoza EINA/UNIZAR
@@ -37,9 +37,6 @@ volatile bool sample = false;
 unsigned long pv_millis_sample = 0;
 const long interval_sample = 200; // Sample and send every 200 ms
 
-// FUNCTIONS DECLARATION
-void read_imu();
-void printer();
 
 // Timer ISR: runs every period_seconds
 void timerCallback() {
@@ -50,8 +47,11 @@ void timerCallback() {
 int period_seconds = 1; // 'x' parameter for send mesagge.
 
 // FUNCTIONS DECLARATION
+void read_imu();
+void printer();
 void read_serial();
 void parse_command(char* buffer);
+
 
 void setup() {
   Wire.begin(); // Master I2C setup
@@ -86,6 +86,8 @@ void loop() {
     printer();
     Wire.beginTransmission(I2C_SLAVE_ADDR);
     Wire.write((uint8_t*)&ax, sizeof(ax)); // Envía los 4 bytes del float
+    Wire.write((uint8_t*)&ay, sizeof(ay)); // Envía los 4 bytes del float
+    Wire.write((uint8_t*)&az, sizeof(az)); // Envía los 4 bytes del float
     Wire.endTransmission();
     sample=false;
   }
